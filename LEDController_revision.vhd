@@ -22,6 +22,7 @@ PORT(
     CS_DUTYCYCLE   : IN  STD_LOGIC;
 	 WRITE_EN       : IN  STD_LOGIC;
     RESETN         : IN  STD_LOGIC;
+    CLK            : IN STD_LOGIC;
 	 LEDs           : OUT STD_LOGIC_VECTOR(9 DOWNTO 0)
     );
 END LEDController;
@@ -361,9 +362,9 @@ BEGIN
     -- 3/30/2025: PWM CONTROLLER DRAFT IMPLEMENTED BY HAMZA    
     -- pwm using a free-running counter and duty cycle comparison
     -- a little unsure about whether we were using external clock or not, so if not, you can uncomment the stuff below (consider it an internal clock)
-    -- Clock_Gen: process
-    -- begin
-    --     CLK <= '0';
+    --Clock_Gen: process
+    --begin
+    --    CLK <= '0';
     --     wait for 10 ns;
     --     CLK <= '1';
     --     wait for 10 ns;
