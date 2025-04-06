@@ -22,7 +22,7 @@ PORT(
     CS_DUTYCYCLE   : IN  STD_LOGIC;
 	 WRITE_EN       : IN  STD_LOGIC;
     RESETN         : IN  STD_LOGIC;
-    CLK            : IN STD_LOGIC;
+--    CLK            : IN STD_LOGIC;
 	 LEDs           : OUT STD_LOGIC_VECTOR(9 DOWNTO 0)
     );
 END LEDController;
