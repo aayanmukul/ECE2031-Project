@@ -3,7 +3,7 @@
 --
 -- This SCOMP peripheral drives ten outputs high or low based on
 -- a value from SCOMP.
-
+-- 
 LIBRARY IEEE;
 LIBRARY LPM;
 
@@ -22,6 +22,7 @@ PORT(
     CS_DUTYCYCLE   : IN  STD_LOGIC;
 	 WRITE_EN       : IN  STD_LOGIC;
     RESETN         : IN  STD_LOGIC;
+	 PWM_CLK        : IN  STD_LOGIC;
 	 LEDs           : OUT STD_LOGIC_VECTOR(9 DOWNTO 0)
     );
 END LEDController;
@@ -49,8 +50,10 @@ ARCHITECTURE a OF LEDController IS
     TYPE REG_ARRAY is array (0 to 9) of STD_LOGIC_VECTOR(9 downto 0);
     SIGNAL ARRAY_LED_DUTYCYCLES : REG_ARRAY := (others => (others => '0'));    
     
-	 -- 10-bit integer representation of MODE
-	 SIGNAL MODE_INT  : INTEGER RANGE 0 TO 1023;
+	 -- PWM counter for PWM controller
+	 SIGNAL PWM_COUNTER: INTEGER RANGE 0 TO 1023 := 0;
+	 -- Assume that a clock signal CLK is available; if not, generate one for simulation.
+	 --SIGNAL CLK: STD_LOGIC := '0';
 	 
 BEGIN
     -- Process Mode peripheral input
@@ -92,237 +95,6 @@ BEGIN
                 -- for the LEDs by setting their PWM duty cycle
 					 REG_PATTERN_DATA <= PATTERN_DATA;
 					 
-					 CASE REG_MODE_DATA(1 downto 0) IS
-                    -- Regular Pattern Mode
-		              WHEN "00"=>
-						      -- Set duty cycles to 100% or 0% based on pattern input
-    			            IF REG_PATTERN_DATA(0) = '1' THEN
-	    			             LED0_VALUE <= "1111111111";
-		    	            ELSE
-			    	             LED0_VALUE <= "0000000000";
-			               END IF;
-								
-								IF REG_PATTERN_DATA(1) = '1' THEN
-	    			             LED1_VALUE <= "1111111111";
-		    	            ELSE
-			    	             LED1_VALUE <= "0000000000";
-			               END IF;
-								
-								IF REG_PATTERN_DATA(2) = '1' THEN
-	    			             LED2_VALUE <= "1111111111";
-		    	            ELSE
-			    	             LED2_VALUE <= "0000000000";
-			               END IF;
-								
-								IF REG_PATTERN_DATA(3) = '1' THEN
-	    			             LED3_VALUE <= "1111111111";
-		    	            ELSE
-			    	             LED3_VALUE <= "0000000000";
-			               END IF;
-								
-								IF REG_PATTERN_DATA(4) = '1' THEN
-	    			             LED4_VALUE <= "1111111111";
-		    	            ELSE
-			    	             LED4_VALUE <= "0000000000";
-			               END IF;
-								
-								IF REG_PATTERN_DATA(5) = '1' THEN
-	    			             LED5_VALUE <= "1111111111";
-		    	            ELSE
-			    	             LED5_VALUE <= "0000000000";
-			               END IF;
-								
-								IF REG_PATTERN_DATA(6) = '1' THEN
-	    			             LED6_VALUE <= "1111111111";
-		    	            ELSE
-			    	             LED6_VALUE <= "0000000000";
-			               END IF;
-								
-								IF REG_PATTERN_DATA(7) = '1' THEN
-	    			             LED7_VALUE <= "1111111111";
-		    	            ELSE
-			    	             LED7_VALUE <= "0000000000";
-			               END IF;
-								
-								IF REG_PATTERN_DATA(8) = '1' THEN
-	    			             LED8_VALUE <= "1111111111";
-		    	            ELSE
-			    	             LED8_VALUE <= "0000000000";
-			               END IF;
-								
-								IF REG_PATTERN_DATA(9) = '1' THEN
-	    			             LED9_VALUE <= "1111111111";
-		    	            ELSE
-			    	             LED9_VALUE <= "0000000000";
-			               END IF;
-		 
-		              -- Regular Toggle Mode
-    		           WHEN "01"=>
-                        -- Set duty cycles to 100% if they are 0% and to 0% if they are not 0% (not necessarily 100%)
-								-- for every LED selected by the input pattern
-    			            IF REG_PATTERN_DATA(0) = '1' THEN
-								    IF ARRAY_LED_DUTYCYCLES(0) = "0000000000" THEN
-									     LED0_VALUE <= "1111111111";
-								    ELSE
-									     LED0_VALUE <= "0000000000";
-									 END IF;
-		    	            ELSE
-			    	             LED0_VALUE <= ARRAY_LED_DUTYCYCLES(0);
-			               END IF;
-
-    			            IF REG_PATTERN_DATA(1) = '1' THEN
-								    IF ARRAY_LED_DUTYCYCLES(1) = "0000000000" THEN
-									     LED1_VALUE <= "1111111111";
-								    ELSE
-									     LED1_VALUE <= "0000000000";
-									 END IF;
-		    	            ELSE
-			    	             LED1_VALUE <= ARRAY_LED_DUTYCYCLES(1);
-			               END IF;
-								
-    			            IF REG_PATTERN_DATA(2) = '1' THEN
-								    IF ARRAY_LED_DUTYCYCLES(2) = "0000000000" THEN
-									     LED2_VALUE <= "1111111111";
-								    ELSE
-									     LED2_VALUE <= "0000000000";
-									 END IF;
-		    	            ELSE
-			    	             LED2_VALUE <= ARRAY_LED_DUTYCYCLES(2);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(3) = '1' THEN
-								    IF ARRAY_LED_DUTYCYCLES(3) = "0000000000" THEN
-									     LED3_VALUE <= "1111111111";
-								    ELSE
-									     LED3_VALUE <= "0000000000";
-									 END IF;
-		    	            ELSE
-			    	             LED3_VALUE <= ARRAY_LED_DUTYCYCLES(3);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(4) = '1' THEN
-								    IF ARRAY_LED_DUTYCYCLES(4) = "0000000000" THEN
-									     LED4_VALUE <= "1111111111";
-								    ELSE
-									     LED4_VALUE <= "0000000000";
-									 END IF;
-		    	            ELSE
-			    	             LED4_VALUE <= ARRAY_LED_DUTYCYCLES(4);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(5) = '1' THEN
-								    IF ARRAY_LED_DUTYCYCLES(5) = "0000000000" THEN
-									     LED5_VALUE <= "1111111111";
-								    ELSE
-									     LED5_VALUE <= "0000000000";
-									 END IF;
-		    	            ELSE
-			    	             LED5_VALUE <= ARRAY_LED_DUTYCYCLES(5);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(6) = '1' THEN
-								    IF ARRAY_LED_DUTYCYCLES(6) = "0000000000" THEN
-									     LED6_VALUE <= "1111111111";
-								    ELSE
-									     LED6_VALUE <= "0000000000";
-									 END IF;
-		    	            ELSE
-			    	             LED6_VALUE <= ARRAY_LED_DUTYCYCLES(6);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(7) = '1' THEN
-								    IF ARRAY_LED_DUTYCYCLES(7) = "0000000000" THEN
-									     LED7_VALUE <= "1111111111";
-								    ELSE
-									     LED7_VALUE <= "0000000000";
-									 END IF;
-		    	            ELSE
-			    	             LED7_VALUE <= ARRAY_LED_DUTYCYCLES(7);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(8) = '1' THEN
-								    IF ARRAY_LED_DUTYCYCLES(8) = "0000000000" THEN
-									     LED8_VALUE <= "1111111111";
-								    ELSE
-									     LED8_VALUE <= "0000000000";
-								    END IF;
-		    	            ELSE
-			    	             LED8_VALUE <= ARRAY_LED_DUTYCYCLES(8);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(9) = '1' THEN
-								    IF ARRAY_LED_DUTYCYCLES(9) = "0000000000" THEN
-									     LED9_VALUE <= "1111111111";
-								    ELSE
-									     LED9_VALUE <= "0000000000";
-									 END IF;
-		    	            ELSE
-			    	             LED9_VALUE <= ARRAY_LED_DUTYCYCLES(9);
-			               END IF;
-		 
-                    -- PWM Pattern Mode
-		              WHEN others=>
-			               -- Set duty cycles to the duty cycle input for each LED
-    			            IF REG_PATTERN_DATA(0) = '1' THEN
-	    			             LED0_VALUE <= REG_DUTYCYCLE_DATA;
-		    	            ELSE
-			    	             LED0_VALUE <= ARRAY_LED_DUTYCYCLES(0);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(1) = '1' THEN
-	    			             LED1_VALUE <= REG_DUTYCYCLE_DATA;
-		    	            ELSE
-			    	             LED1_VALUE <= ARRAY_LED_DUTYCYCLES(1);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(2) = '1' THEN
-	    			             LED2_VALUE <= REG_DUTYCYCLE_DATA;
-		    	            ELSE
-			    	             LED2_VALUE <= ARRAY_LED_DUTYCYCLES(2);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(3) = '1' THEN
-	    			             LED3_VALUE <= REG_DUTYCYCLE_DATA;
-		    	            ELSE
-			    	             LED3_VALUE <= ARRAY_LED_DUTYCYCLES(3);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(4) = '1' THEN
-	    			             LED4_VALUE <= REG_DUTYCYCLE_DATA;
-		    	            ELSE
-			    	             LED4_VALUE <= ARRAY_LED_DUTYCYCLES(4);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(5) = '1' THEN
-	    			             LED5_VALUE <= REG_DUTYCYCLE_DATA;
-		    	            ELSE
-			    	             LED5_VALUE <= ARRAY_LED_DUTYCYCLES(5);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(6) = '1' THEN
-	    			             LED6_VALUE <= REG_DUTYCYCLE_DATA;
-		    	            ELSE
-			    	             LED6_VALUE <= ARRAY_LED_DUTYCYCLES(6);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(7) = '1' THEN
-	    			             LED7_VALUE <= REG_DUTYCYCLE_DATA;
-		    	            ELSE
-			    	             LED7_VALUE <= ARRAY_LED_DUTYCYCLES(7);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(8) = '1' THEN
-	    			             LED8_VALUE <= REG_DUTYCYCLE_DATA;
-		    	            ELSE
-			    	             LED8_VALUE <= ARRAY_LED_DUTYCYCLES(8);
-			               END IF;
-								
-								IF REG_PATTERN_DATA(9) = '1' THEN
-	    			             LED9_VALUE <= REG_DUTYCYCLE_DATA;
-		    	            ELSE
-			    	             LED9_VALUE <= ARRAY_LED_DUTYCYCLES(9);
-			               END IF;
-                END CASE;
 					 
 					 ARRAY_LED_DUTYCYCLES(0) <= LED0_VALUE;
 					 ARRAY_LED_DUTYCYCLES(1) <= LED1_VALUE;
@@ -350,18 +122,278 @@ BEGIN
     END PROCESS;
 
 
-    -- REG PWM LED Controller
-    -- (not yet implemented)
-	 -- Placeholder: use first bit to test functionality
-	 -- LEDs <= ARRAY_LED_DUTYCYCLES;
-    LEDs(0) <= ARRAY_LED_DUTYCYCLES(0)(0);
-    LEDs(1) <= ARRAY_LED_DUTYCYCLES(1)(0);
-    LEDs(2) <= ARRAY_LED_DUTYCYCLES(2)(0);
-    LEDs(3) <= ARRAY_LED_DUTYCYCLES(3)(0);
-    LEDs(4) <= ARRAY_LED_DUTYCYCLES(4)(0);
-    LEDs(5) <= ARRAY_LED_DUTYCYCLES(5)(0);
-    LEDs(6) <= ARRAY_LED_DUTYCYCLES(6)(0);
-    LEDs(7) <= ARRAY_LED_DUTYCYCLES(7)(0);
-    LEDs(8) <= ARRAY_LED_DUTYCYCLES(8)(0);
-    LEDs(9) <= ARRAY_LED_DUTYCYCLES(9)(0);
+    -- PWM LED Controller
+
+    -- 3/30/2025: PWM CONTROLLER DRAFT IMPLEMENTED BY HAMZA    
+    -- pwm using a free-running counter and duty cycle comparison
+    -- a little unsure about whether we were using external clock or not, so if not, you can uncomment the stuff below (consider it an internal clock)
+    --Clock_Gen: process
+    --begin
+    --    CLK <= '0';
+    --     wait for 10 ns;
+    --     CLK <= '1';
+    --     wait for 10 ns;
+    -- end process;
+    
+    PWM_Process: process(PWM_CLK, RESETN)
+    begin
+        if RESETN = '0' then
+            PWM_COUNTER <= 0;
+        elsif rising_edge(PWM_CLK) then
+            if PWM_COUNTER = 1023 then  -- we have 2^10 possible values of brightness levels because we are using 10-bit numbers
+                PWM_COUNTER <= 0;
+            else
+                PWM_COUNTER <= PWM_COUNTER + 1;
+            end if;
+        end if;
+    end process;
+	 
+	 MUX_PROCESS : PROCESS(REG_MODE_DATA, REG_PATTERN_DATA, REG_DUTYCYCLE_DATA, ARRAY_LED_DUTYCYCLES)
+	 BEGIN
+		 -- Combinational logic to set duty cycle array
+		 CASE REG_MODE_DATA(1 downto 0) IS
+		  -- Regular Pattern Mode
+		  WHEN "00"=>
+				-- Set duty cycles to 100% or 0% based on pattern input
+				IF REG_PATTERN_DATA(0) = '1' THEN
+					 LED0_VALUE <= "1111111111";
+				ELSE
+					 LED0_VALUE <= "0000000000";
+				END IF;
+				
+				IF REG_PATTERN_DATA(1) = '1' THEN
+					 LED1_VALUE <= "1111111111";
+				ELSE
+					 LED1_VALUE <= "0000000000";
+				END IF;
+				
+				IF REG_PATTERN_DATA(2) = '1' THEN
+					 LED2_VALUE <= "1111111111";
+				ELSE
+					 LED2_VALUE <= "0000000000";
+				END IF;
+				
+				IF REG_PATTERN_DATA(3) = '1' THEN
+					 LED3_VALUE <= "1111111111";
+				ELSE
+					 LED3_VALUE <= "0000000000";
+				END IF;
+				
+				IF REG_PATTERN_DATA(4) = '1' THEN
+					 LED4_VALUE <= "1111111111";
+				ELSE
+					 LED4_VALUE <= "0000000000";
+				END IF;
+				
+				IF REG_PATTERN_DATA(5) = '1' THEN
+					 LED5_VALUE <= "1111111111";
+				ELSE
+					 LED5_VALUE <= "0000000000";
+				END IF;
+				
+				IF REG_PATTERN_DATA(6) = '1' THEN
+					 LED6_VALUE <= "1111111111";
+				ELSE
+					 LED6_VALUE <= "0000000000";
+				END IF;
+				
+				IF REG_PATTERN_DATA(7) = '1' THEN
+					 LED7_VALUE <= "1111111111";
+				ELSE
+					 LED7_VALUE <= "0000000000";
+				END IF;
+				
+				IF REG_PATTERN_DATA(8) = '1' THEN
+					 LED8_VALUE <= "1111111111";
+				ELSE
+					 LED8_VALUE <= "0000000000";
+				END IF;
+				
+				IF REG_PATTERN_DATA(9) = '1' THEN
+					 LED9_VALUE <= "1111111111";
+				ELSE
+					 LED9_VALUE <= "0000000000";
+				END IF;
+
+		  -- Regular Toggle Mode
+		  WHEN "01"=>
+				-- Set duty cycles to 100% if they are 0% and to 0% if they are not 0% (not necessarily 100%)
+				-- for every LED selected by the input pattern
+				IF REG_PATTERN_DATA(0) = '1' THEN
+					 IF ARRAY_LED_DUTYCYCLES(0) = "0000000000" THEN
+						  LED0_VALUE <= "1111111111";
+					 ELSE
+						  LED0_VALUE <= "0000000000";
+					 END IF;
+				ELSE
+					 LED0_VALUE <= ARRAY_LED_DUTYCYCLES(0);
+				END IF;
+
+				IF REG_PATTERN_DATA(1) = '1' THEN
+					 IF ARRAY_LED_DUTYCYCLES(1) = "0000000000" THEN
+						  LED1_VALUE <= "1111111111";
+					 ELSE
+						  LED1_VALUE <= "0000000000";
+					 END IF;
+				ELSE
+					 LED1_VALUE <= ARRAY_LED_DUTYCYCLES(1);
+				END IF;
+				
+				IF REG_PATTERN_DATA(2) = '1' THEN
+					 IF ARRAY_LED_DUTYCYCLES(2) = "0000000000" THEN
+						  LED2_VALUE <= "1111111111";
+					 ELSE
+						  LED2_VALUE <= "0000000000";
+					 END IF;
+				ELSE
+					 LED2_VALUE <= ARRAY_LED_DUTYCYCLES(2);
+				END IF;
+				
+				IF REG_PATTERN_DATA(3) = '1' THEN
+					 IF ARRAY_LED_DUTYCYCLES(3) = "0000000000" THEN
+						  LED3_VALUE <= "1111111111";
+					 ELSE
+						  LED3_VALUE <= "0000000000";
+					 END IF;
+				ELSE
+					 LED3_VALUE <= ARRAY_LED_DUTYCYCLES(3);
+				END IF;
+				
+				IF REG_PATTERN_DATA(4) = '1' THEN
+					 IF ARRAY_LED_DUTYCYCLES(4) = "0000000000" THEN
+						  LED4_VALUE <= "1111111111";
+					 ELSE
+						  LED4_VALUE <= "0000000000";
+					 END IF;
+				ELSE
+					 LED4_VALUE <= ARRAY_LED_DUTYCYCLES(4);
+				END IF;
+				
+				IF REG_PATTERN_DATA(5) = '1' THEN
+					 IF ARRAY_LED_DUTYCYCLES(5) = "0000000000" THEN
+						  LED5_VALUE <= "1111111111";
+					 ELSE
+						  LED5_VALUE <= "0000000000";
+					 END IF;
+				ELSE
+					 LED5_VALUE <= ARRAY_LED_DUTYCYCLES(5);
+				END IF;
+				
+				IF REG_PATTERN_DATA(6) = '1' THEN
+					 IF ARRAY_LED_DUTYCYCLES(6) = "0000000000" THEN
+						  LED6_VALUE <= "1111111111";
+					 ELSE
+						  LED6_VALUE <= "0000000000";
+					 END IF;
+				ELSE
+					 LED6_VALUE <= ARRAY_LED_DUTYCYCLES(6);
+				END IF;
+				
+				IF REG_PATTERN_DATA(7) = '1' THEN
+					 IF ARRAY_LED_DUTYCYCLES(7) = "0000000000" THEN
+						  LED7_VALUE <= "1111111111";
+					 ELSE
+						  LED7_VALUE <= "0000000000";
+					 END IF;
+				ELSE
+					 LED7_VALUE <= ARRAY_LED_DUTYCYCLES(7);
+				END IF;
+				
+				IF REG_PATTERN_DATA(8) = '1' THEN
+					 IF ARRAY_LED_DUTYCYCLES(8) = "0000000000" THEN
+						  LED8_VALUE <= "1111111111";
+					 ELSE
+						  LED8_VALUE <= "0000000000";
+					 END IF;
+				ELSE
+					 LED8_VALUE <= ARRAY_LED_DUTYCYCLES(8);
+				END IF;
+				
+				IF REG_PATTERN_DATA(9) = '1' THEN
+					 IF ARRAY_LED_DUTYCYCLES(9) = "0000000000" THEN
+						  LED9_VALUE <= "1111111111";
+					 ELSE
+						  LED9_VALUE <= "0000000000";
+					 END IF;
+				ELSE
+					 LED9_VALUE <= ARRAY_LED_DUTYCYCLES(9);
+				END IF;
+
+		  -- PWM Pattern Mode
+		  WHEN others=>
+				-- Set duty cycles to the duty cycle input for each LED
+				IF REG_PATTERN_DATA(0) = '1' THEN
+					 LED0_VALUE <= REG_DUTYCYCLE_DATA;
+				ELSE
+					 LED0_VALUE <= ARRAY_LED_DUTYCYCLES(0);
+				END IF;
+				
+				IF REG_PATTERN_DATA(1) = '1' THEN
+					 LED1_VALUE <= REG_DUTYCYCLE_DATA;
+				ELSE
+					 LED1_VALUE <= ARRAY_LED_DUTYCYCLES(1);
+				END IF;
+				
+				IF REG_PATTERN_DATA(2) = '1' THEN
+					 LED2_VALUE <= REG_DUTYCYCLE_DATA;
+				ELSE
+					 LED2_VALUE <= ARRAY_LED_DUTYCYCLES(2);
+				END IF;
+				
+				IF REG_PATTERN_DATA(3) = '1' THEN
+					 LED3_VALUE <= REG_DUTYCYCLE_DATA;
+				ELSE
+					 LED3_VALUE <= ARRAY_LED_DUTYCYCLES(3);
+				END IF;
+				
+				IF REG_PATTERN_DATA(4) = '1' THEN
+					 LED4_VALUE <= REG_DUTYCYCLE_DATA;
+				ELSE
+					 LED4_VALUE <= ARRAY_LED_DUTYCYCLES(4);
+				END IF;
+				
+				IF REG_PATTERN_DATA(5) = '1' THEN
+					 LED5_VALUE <= REG_DUTYCYCLE_DATA;
+				ELSE
+					 LED5_VALUE <= ARRAY_LED_DUTYCYCLES(5);
+				END IF;
+				
+				IF REG_PATTERN_DATA(6) = '1' THEN
+					 LED6_VALUE <= REG_DUTYCYCLE_DATA;
+				ELSE
+					 LED6_VALUE <= ARRAY_LED_DUTYCYCLES(6);
+				END IF;
+				
+				IF REG_PATTERN_DATA(7) = '1' THEN
+					 LED7_VALUE <= REG_DUTYCYCLE_DATA;
+				ELSE
+					 LED7_VALUE <= ARRAY_LED_DUTYCYCLES(7);
+				END IF;
+				
+				IF REG_PATTERN_DATA(8) = '1' THEN
+					 LED8_VALUE <= REG_DUTYCYCLE_DATA;
+				ELSE
+					 LED8_VALUE <= ARRAY_LED_DUTYCYCLES(8);
+				END IF;
+				
+				IF REG_PATTERN_DATA(9) = '1' THEN
+					 LED9_VALUE <= REG_DUTYCYCLE_DATA;
+				ELSE
+					 LED9_VALUE <= ARRAY_LED_DUTYCYCLES(9);
+				END IF;
+		 END CASE;
+	 END PROCESS MUX_PROCESS;
+
+    -- Compare PWM counter to LED duty cycle to determine if LED should be on or off
+    LEDs(0) <= '1' when PWM_COUNTER < conv_integer(ARRAY_LED_DUTYCYCLES(0)) else '0';
+    LEDs(1) <= '1' when PWM_COUNTER < conv_integer(ARRAY_LED_DUTYCYCLES(1)) else '0';
+    LEDs(2) <= '1' when PWM_COUNTER < conv_integer(ARRAY_LED_DUTYCYCLES(2)) else '0';
+    LEDs(3) <= '1' when PWM_COUNTER < conv_integer(ARRAY_LED_DUTYCYCLES(3)) else '0';
+    LEDs(4) <= '1' when PWM_COUNTER < conv_integer(ARRAY_LED_DUTYCYCLES(4)) else '0';
+    LEDs(5) <= '1' when PWM_COUNTER < conv_integer(ARRAY_LED_DUTYCYCLES(5)) else '0';
+    LEDs(6) <= '1' when PWM_COUNTER < conv_integer(ARRAY_LED_DUTYCYCLES(6)) else '0';
+    LEDs(7) <= '1' when PWM_COUNTER < conv_integer(ARRAY_LED_DUTYCYCLES(7)) else '0';
+    LEDs(8) <= '1' when PWM_COUNTER < conv_integer(ARRAY_LED_DUTYCYCLES(8)) else '0';
+    LEDs(9) <= '1' when PWM_COUNTER < conv_integer(ARRAY_LED_DUTYCYCLES(9)) else '0';
+
 END a;
