@@ -75,7 +75,9 @@ AFTERNEGATIVE:
          STORE TEMP
          
 ENDINGLOOP:         
-         LOAD TEMP
+         LOADI 2
+         OUT MODE
+	 LOAD TEMP
          OUT DUTY
          ADDI -1
          STORE TEMP
