@@ -59,17 +59,18 @@ REACTION:
 ; --- REACTION TIME MEASUREMENT & SCORING ---
 DONE:    IN Timer         ; Read reaction time (in ticks) from the Timer
          STORE ReactionVal  ; Save reaction time in a temporary variable
+	 OUT HEX0
+	 
 
          ; Compute brightness value: brightness = 100 – reaction_time.
          ; Faster responses (lower reaction time) yield higher brightness.
-         LOAD HUNDRED
+         LOADI 20
          SUB ReactionVal
-         SHIFT -2
          STORE ReactionVal
          JNEG SET_ONE      ; If result is negative, force brightness to 1
 AFTERNEGATIVE:
 
-		 LOADI 31
+         LOADI 31
          STORE TEMP
          
 ENDINGLOOP:         
@@ -80,7 +81,7 @@ ENDINGLOOP:
          ADDI -1
          STORE TEMP
          
-         LOAD ALLLED
+         LOAD LEDPattern
          OUT LEDs
          
          CALL DELAY
@@ -107,7 +108,7 @@ DELAY:
         
 	DELAYLOOP:
 		IN TIMER
-        ADDI -8 ; change this number to shorten delay
+        ADDI -5 ; change this number to shorten delay
         JNEG DELAYLOOP
 		RETURN
 
@@ -130,6 +131,7 @@ LEDPattern: DW 0
 ReactionVal: DW 0         ; Temporary storage for reaction time
 THREE: DW 3
 ALLLED: DW 1023
+LEDPattern:DW &B0111111110
 Bit9:      DW &B1000000000
 Pattern1: DW  &B1010101010
 Pattern2: DW  &B0101010101
