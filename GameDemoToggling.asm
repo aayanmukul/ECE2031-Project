@@ -81,7 +81,7 @@ ENDINGLOOP:
          ADDI -1
          STORE TEMP
          
-         LOAD LEDPattern
+         LOAD EndingPattern
          OUT LEDs
          
          CALL DELAY
@@ -131,7 +131,7 @@ LEDPattern: DW 0
 ReactionVal: DW 0         ; Temporary storage for reaction time
 THREE: DW 3
 ALLLED: DW 1023
-LEDPattern:DW &B0111111110
+EndingPattern: DW &B0111111110
 Bit9:      DW &B1000000000
 Pattern1: DW  &B1010101010
 Pattern2: DW  &B0101010101
