@@ -84,7 +84,7 @@ AFTERNEGATIVE:
          LOAD ALLLED
          OUT Leds
          
-         LOADI 31
+         LOADI 1023 ; changed this
          STORE TEMP
          
 ENDINGLOOP:         
@@ -92,7 +92,7 @@ ENDINGLOOP:
          OUT MODE
          LOAD TEMP
          OUT DUTY
-         ADDI -1
+         ADDI -196 ; changed this and the other one later
          STORE TEMP
          
          LOAD EndingPattern
@@ -101,7 +101,7 @@ ENDINGLOOP:
          CALL DELAY
          
          LOAD TEMP
-         ADDI 1
+         ADDI 196
          SUB ReactionVal
          JPOS ENDINGLOOP
 
@@ -122,7 +122,7 @@ DELAY:
         
 	DELAYLOOP:
 		IN Timer
-        ADDI -50 ; change this number to shorten delay
+        ADDI -10 ; change this number to shorten delay - changed to -10
         JNEG DELAYLOOP
 		RETURN
 
