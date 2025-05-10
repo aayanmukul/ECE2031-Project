@@ -12,6 +12,9 @@ HUNDRED: DW 128    ; Maximum brightness value scale
 ONE: DW 1      ; Minimum brightness value
 MASK: DW 15     ; Mask to extract lower 4 bits for LED pattern (0-15)
 
+		 LOADI 15
+         STORE TEMP
+         
          LOADI 0
          OUT Mode
          OUT Duty
@@ -25,11 +28,14 @@ INIT:
          JPOS INIT
 
 START:   
-		 LOADI 1
+		 LOADI 0
          OUT MODE
-         LOAD ALLLED
+         LOAD Pattern1
          OUT LEDs
-         CALL NOPDELAY
+         CALL DelayTwo
+         LOAD Pattern2
+         OUT LEDs
+         CALL DELAYTwo
          
          IN Switches        ; Wait for switch 9 press to start a round
 		 AND Bit9
@@ -41,7 +47,10 @@ START:
 	 OUT Mode
          IN Timer
          AND MASK           ; Mask out all but the lower 4 bits
+         JPOS NEXTSTEP 
          ADDI 1
+         
+NEXTSTEP:
          STORE LEDPattern
          OUT LEDs         ; Display the random LED pattern
 
@@ -64,13 +73,18 @@ DONE:    IN Timer         ; Read reaction time (in ticks) from the Timer
 
          ; Compute brightness value: brightness = 100 – reaction_time.
          ; Faster responses (lower reaction time) yield higher brightness.
-         LOADI 20
+         LOADI 30
          SUB ReactionVal
          STORE ReactionVal
          JNEG SET_ONE      ; If result is negative, force brightness to 1
 AFTERNEGATIVE:
 
-         LOADI 31
+		 LOADI 0
+         OUT MODE
+         LOAD ALLLED
+         OUT Leds
+         
+         LOADI 1023 ; changed this
          STORE TEMP
          
 ENDINGLOOP:         
@@ -78,7 +92,7 @@ ENDINGLOOP:
          OUT MODE
          LOAD TEMP
          OUT DUTY
-         ADDI -1
+         ADDI -196 ; changed this and the other one later
          STORE TEMP
          
          LOAD EndingPattern
@@ -87,7 +101,7 @@ ENDINGLOOP:
          CALL DELAY
          
          LOAD TEMP
-         ADDI 1
+         ADDI 196
          SUB ReactionVal
          JPOS ENDINGLOOP
 
@@ -104,23 +118,24 @@ SET_ONE:
          JUMP AFTERNEGATIVE
 
 DELAY:
-		OUT TIMER
+		OUT Timer
         
 	DELAYLOOP:
-		IN TIMER
-        ADDI -5 ; change this number to shorten delay
+		IN Timer
+        ADDI -10 ; change this number to shorten delay - changed to -10
         JNEG DELAYLOOP
 		RETURN
 
-NOPDELAY:
-	LOADI 100 ; change this number to shorten delay
+    
+DelayTwo:
+	IN Timer
     STORE TEMP
-   
-NOPLOOP:
-	LOAD TEMP
-    ADDI -1
-    STORE TEMP
-    JPOS NOPLOOP
+    
+DelayTwoLoop:
+	IN Timer
+    SUB TEMP
+    ADDI -10
+    JNEG DELAYTWOLOOP
     RETURN
     
 
